@@ -1,16 +1,45 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ANIME } from '@/lib/data';
 import { useStore } from '@/lib/store';
 import AnimeCard from './AnimeCard';
+import type { Anime, ListKey } from '@/lib/types';
 
-export default function TrendingAll() {
+interface TrendingItem {
+  anime: Anime;
+  listKey: ListKey | null;
+  watchedEps: number;
+}
+
+interface TrendingAllProps {
+  initialData: TrendingItem[];
+}
+
+export default function TrendingAll({ initialData }: TrendingAllProps) {
   const { lists, watchedEps, setListFor, removeFrom } = useStore();
+  const [localData, setLocalData] = useState<TrendingItem[]>(initialData);
   const [count, setCount] = useState(12);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const total = ANIME.length;
+  const total = localData.length;
+
+  const handleSetList = (id: string, key: string) => {
+    setLocalData((prev) =>
+      prev.map((item) =>
+        item.anime.id === id ? { ...item, listKey: key as ListKey } : item,
+      ),
+    );
+    setListFor(id, key);
+  };
+
+  const handleRemove = (id: string) => {
+    setLocalData((prev) =>
+      prev.map((item) =>
+        item.anime.id === id ? { ...item, listKey: null, watchedEps: 0 } : item,
+      ),
+    );
+    removeFrom(id);
+  };
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -26,7 +55,7 @@ export default function TrendingAll() {
     return () => obs.disconnect();
   }, [total]);
 
-  const items = ANIME.slice(0, count);
+  const items = localData.slice(0, count);
 
   return (
     <main className="page">
@@ -34,7 +63,7 @@ export default function TrendingAll() {
         <div>
           <h1 className="ta-title">Trending now</h1>
           <p className="ta-sub">
-            Top across the community · Showing {items.length} of {total} · Updated 12 minutes ago
+            Top across the community · Showing {items.length} of {total} · Updated just now
           </p>
         </div>
         <div className="ta-sort">
@@ -53,15 +82,15 @@ export default function TrendingAll() {
       </Link>
 
       <div className="ta-list">
-        {items.map((a, i) => (
-          <div className="ta-row" key={a.id}>
+        {items.map((item, i) => (
+          <div className="ta-row" key={item.anime.id}>
             <div className="ta-rank">{String(i + 1).padStart(2, '0')}</div>
             <AnimeCard
-              anime={a}
-              currentList={lists[a.id] ?? null}
-              watchedEps={watchedEps[a.id] ?? 0}
-              onSetList={(k) => setListFor(a.id, k)}
-              onRemove={() => removeFrom(a.id)}
+              anime={item.anime}
+              currentList={item.listKey ?? lists[item.anime.id] ?? null}
+              watchedEps={item.watchedEps || (watchedEps[item.anime.id] ?? 0)}
+              onSetList={(k) => handleSetList(item.anime.id, k)}
+              onRemove={() => handleRemove(item.anime.id)}
             />
           </div>
         ))}
@@ -71,7 +100,8 @@ export default function TrendingAll() {
             Loading more…
           </div>
         )}
-        {count >= total && <div className="ta-end">You&apos;ve reached the end of trending.</div>}
+        {count >= total && total > 0 && <div className="ta-end">You&apos;ve reached the end of trending.</div>}
+        {total === 0 && <div className="ta-end">No trending data available at the moment.</div>}
       </div>
     </main>
   );

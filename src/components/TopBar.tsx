@@ -1,17 +1,27 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
+import type { User } from '@/lib/mal';
 
-export default function TopBar() {
+interface TopBarProps {
+  userInfo?: User | null;
+}
+
+export default function TopBar({ userInfo }: TopBarProps) {
   const pathname = usePathname();
+
+  const initials = userInfo?.name
+    ? userInfo.name.slice(0, 2).toUpperCase()
+    : 'JM';
 
   return (
     <header className="topbar">
       <div className="topbar-inner">
         <Link href="/" className="brand" style={{ textDecoration: 'none', color: 'inherit' }}>
           <div className="brand-name">
-            JustMeGaaRa <span className="brand-x">×</span> Anime
+            JustMeGaaRa <span className="brand-x">/</span> Anime
           </div>
         </Link>
         <nav className="topnav">
@@ -34,7 +44,23 @@ export default function TopBar() {
             <input placeholder="Search 24,193 titles…" />
             <span className="search-kbd">⌘K</span>
           </div>
-          <div className="avatar" title="JustMeGaaRa">JM</div>
+          {userInfo?.picture ? (
+            <Image
+              src={userInfo.picture}
+              alt={userInfo.name}
+              width={32}
+              height={32}
+              className="avatar"
+              title={userInfo.name}
+              style={{ borderRadius: '50%', objectFit: 'cover' }}
+            />
+          ) : userInfo ? (
+            <div className="avatar" title={userInfo.name}>{initials}</div>
+          ) : (
+            <Link href="/auth/login" className="action-link" style={{ fontSize: '13px', padding: '6px 12px' }}>
+              Sign in with MAL
+            </Link>
+          )}
         </div>
       </div>
     </header>

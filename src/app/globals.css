@@ -609,7 +609,7 @@ img { display: block; max-width: 100%; }
   gap: 32px;
   padding: 40px 40px 36px;
   min-height: 460px;
-  align-items: end;
+  align-items: start;
 }
 .dt-poster {
   position: relative;

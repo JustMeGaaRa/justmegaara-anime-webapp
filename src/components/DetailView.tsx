@@ -225,9 +225,9 @@ function SeasonsList({ anime }: { anime: Anime }) {
   );
 }
 
-export default function DetailView({ animeId }: { animeId: string }) {
+export default function DetailView({ initialAnime }: { initialAnime: Anime | null }) {
   const { lists, watchedEps, setListFor, removeFrom } = useStore();
-  const anime = ANIME_BY_ID[animeId];
+  const anime = initialAnime;
 
   if (!anime) {
     return (
@@ -236,15 +236,25 @@ export default function DetailView({ animeId }: { animeId: string }) {
           ← Back to dashboard
         </Link>
         <div className="empty">
-          <div className="empty-mark">∅</div>
-          <div className="empty-title">Anime not found</div>
+          <div className="empty-mark">...</div>
+          <div className="empty-title">Loading anime data...</div>
         </div>
       </main>
     );
   }
 
+  const handleSetList = (key: string) => {
+    setListFor(anime.id, key);
+  };
+
+  const handleRemove = () => {
+    removeFrom(anime.id);
+  };
+
   const currentList = lists[anime.id] ?? null;
-  const related = anime.relatedIds.map((id) => ANIME_BY_ID[id]).filter(Boolean);
+  const related = anime.relatedIds
+    .map((id) => ANIME_BY_ID[id])
+    .filter((a): a is Anime => !!a);
 
   return (
     <main className="page page--detail">
@@ -255,31 +265,33 @@ export default function DetailView({ animeId }: { animeId: string }) {
         anime={anime}
         currentList={currentList}
         watchedEps={watchedEps[anime.id] ?? 0}
-        onSetList={(k) => setListFor(anime.id, k)}
-        onRemove={() => removeFrom(anime.id)}
+        onSetList={handleSetList}
+        onRemove={handleRemove}
       />
       <SeasonsList anime={anime} />
-      <section className="section">
-        <header className="section-head">
-          <div>
-            <h2 className="section-title">More like this</h2>
-            <p className="section-sub">Based on genre and studio</p>
-          </div>
-        </header>
-        <HorizontalScroller>
-          {related.map((a) => (
-            <div className="row-card" key={a.id}>
-              <AnimeCard
-                anime={a}
-                currentList={lists[a.id] ?? null}
-                watchedEps={watchedEps[a.id] ?? 0}
-                onSetList={(k) => setListFor(a.id, k)}
-                onRemove={() => removeFrom(a.id)}
-              />
+      {related.length > 0 && (
+        <section className="section">
+          <header className="section-head">
+            <div>
+              <h2 className="section-title">More like this</h2>
+              <p className="section-sub">Based on genre and studio</p>
             </div>
-          ))}
-        </HorizontalScroller>
-      </section>
+          </header>
+          <HorizontalScroller>
+            {related.map((a) => (
+              <div className="row-card" key={a.id}>
+                <AnimeCard
+                  anime={a}
+                  currentList={lists[a.id] ?? null}
+                  watchedEps={watchedEps[a.id] ?? 0}
+                  onSetList={(k) => setListFor(a.id, k)}
+                  onRemove={() => removeFrom(a.id)}
+                />
+              </div>
+            ))}
+          </HorizontalScroller>
+        </section>
+      )}
     </main>
   );
 }
