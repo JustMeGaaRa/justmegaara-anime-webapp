@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { generateCodeVerifier, generateCodeChallenge, getAuthorizationUrl } from '@/lib/mal/auth';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const clientId = process.env.MAL_CLIENT_ID;
   if (!clientId) {
     return new Response('MAL_CLIENT_ID is not configured in .env', { status: 500 });

@@ -1,7 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { exchangeCode } from '@/lib/mal/auth';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
   const error = url.searchParams.get('error');
@@ -10,8 +10,7 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL('/?error=auth_failed', request.url));
   }
 
-  // Next.js 16 requires awaiting request.cookies, wait, no, in route handlers request.cookies is synchronously accessible via get? 
-  // No, request.cookies is just a RequestCookies object. But we can just use the next/headers cookies() as well. Let's use request.cookies here.
+  // Next.js 16 allows synchronously accessing request.cookies in route handlers when using NextRequest.
   const codeVerifier = request.cookies.get('mal_code_verifier')?.value;
 
   if (!codeVerifier) {
