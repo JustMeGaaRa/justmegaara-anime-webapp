@@ -1,12 +1,12 @@
 import TopBar from '@/components/TopBar';
-import Dashboard from '@/components/Dashboard';
+import TrendingAll from '@/components/TrendingAll';
 import Toast from '@/components/Toast';
 
-export default function Home() {
+export default function TrendingPage() {
   return (
     <>
       <TopBar />
-      <Dashboard />
+      <TrendingAll />
       <Toast />
     </>
   );
