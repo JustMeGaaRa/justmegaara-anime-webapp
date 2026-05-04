@@ -40,7 +40,8 @@ export default function Dashboard({ malData }: DashboardProps) {
         ) ?? null,
       );
     }
-    setListFor(id, key);
+    const item = malList?.find(it => it.anime.id === id);
+    setListFor(id, key, item?.anime.title || ANIME_BY_ID[id]?.title);
 
     try {
       await updateAnimeStatus(Number(id), unmapListStatus(key as ListKey));
@@ -56,7 +57,8 @@ export default function Dashboard({ malData }: DashboardProps) {
     if (malList) {
       setMalList((prev) => prev?.filter((item) => item.anime.id !== id) ?? null);
     }
-    removeFrom(id);
+    const item = malList?.find(it => it.anime.id === id);
+    removeFrom(id, item?.anime.title || ANIME_BY_ID[id]?.title);
 
     try {
       await deleteAnimeFromList(Number(id));

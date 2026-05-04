@@ -31,7 +31,8 @@ export default function TrendingAll({ initialData }: TrendingAllProps) {
         item.anime.id === id ? { ...item, listKey: key as ListKey } : item,
       ),
     );
-    setListFor(id, key);
+    const item = localData.find((it) => it.anime.id === id);
+    setListFor(id, key, item?.anime.title);
 
     try {
       await updateAnimeStatus(Number(id), unmapListStatus(key as ListKey));
@@ -46,7 +47,8 @@ export default function TrendingAll({ initialData }: TrendingAllProps) {
         item.anime.id === id ? { ...item, listKey: null, watchedEps: 0 } : item,
       ),
     );
-    removeFrom(id);
+    const item = localData.find((it) => it.anime.id === id);
+    removeFrom(id, item?.anime.title);
 
     try {
       await deleteAnimeFromList(Number(id));
@@ -105,6 +107,7 @@ export default function TrendingAll({ initialData }: TrendingAllProps) {
               watchedEps={item.watchedEps || (watchedEps[item.anime.id] ?? 0)}
               onSetList={(k) => handleSetList(item.anime.id, k)}
               onRemove={() => handleRemove(item.anime.id)}
+              showListStatus={true}
             />
           </div>
         ))}

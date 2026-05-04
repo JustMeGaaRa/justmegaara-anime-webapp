@@ -23,7 +23,7 @@ const ANIME_FIELDS = [
   'rating',
   'num_episodes',
   'source',
-  'list_status',
+  'my_list_status',
 ].join(',');
 
 interface PageProps {
@@ -56,8 +56,8 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
       searchData = searchResponse.data.map((item: any) => ({
         anime: mapMALAnime(item.node),
-        listKey: item.node.list_status ? mapListStatus(item.node.list_status.status) : null,
-        watchedEps: item.node.list_status?.num_episodes_watched ?? 0,
+        listKey: item.node.my_list_status ? mapListStatus(item.node.my_list_status.status) : null,
+        watchedEps: item.node.my_list_status?.num_episodes_watched ?? 0,
       }));
       userInfo = user;
     } catch (err) {

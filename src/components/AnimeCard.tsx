@@ -102,6 +102,7 @@ interface AnimeCardProps {
   onRemove: () => void;
   density?: 'compact' | 'regular' | 'comfy';
   clickable?: boolean;
+  showListStatus?: boolean;
 }
 
 export default function AnimeCard({
@@ -112,6 +113,7 @@ export default function AnimeCard({
   onRemove,
   density = 'regular',
   clickable = true,
+  showListStatus = false,
 }: AnimeCardProps) {
   const router = useRouter();
 
@@ -149,7 +151,15 @@ export default function AnimeCard({
       </div>
       <div className="ac-body">
         <div className="ac-body-top">
-          <StatusPill status={anime.status} />
+          <div className="ac-body-badges">
+            <StatusPill status={anime.status} />
+            {showListStatus && currentList && (
+              <div className="ac-list-tag">
+                <span className={`ac-dot ac-dot--${currentList}`}></span>
+                {LIST_LABELS[currentList]}
+              </div>
+            )}
+          </div>
           <CardMenu
             anime={anime}
             currentList={currentList}

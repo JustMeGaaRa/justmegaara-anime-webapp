@@ -253,7 +253,7 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
   }
 
   const handleSetList = async (key: string) => {
-    setListFor(anime.id, key);
+    setListFor(anime.id, key, anime.title);
     try {
       await updateAnimeStatus(Number(anime.id), unmapListStatus(key as ListKey));
     } catch (err) {
@@ -262,7 +262,7 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
   };
 
   const handleRemove = async () => {
-    removeFrom(anime.id);
+    removeFrom(anime.id, anime.title);
     try {
       await deleteAnimeFromList(Number(anime.id));
     } catch (err) {
@@ -305,7 +305,7 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
                   currentList={lists[a.id] ?? null}
                   watchedEps={watchedEps[a.id] ?? 0}
                   onSetList={async (k) => {
-                    setListFor(a.id, k);
+                    setListFor(a.id, k, a.title);
                     try {
                       await updateAnimeStatus(Number(a.id), unmapListStatus(k as ListKey));
                     } catch (err) {
@@ -313,7 +313,7 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
                     }
                   }}
                   onRemove={async () => {
-                    removeFrom(a.id);
+                    removeFrom(a.id, a.title);
                     try {
                       await deleteAnimeFromList(Number(a.id));
                     } catch (err) {
