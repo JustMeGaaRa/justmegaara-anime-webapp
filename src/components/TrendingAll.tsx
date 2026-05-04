@@ -16,14 +16,31 @@ interface TrendingItem {
 
 interface TrendingAllProps {
   initialData: TrendingItem[];
+  currentType: string;
 }
 
-export default function TrendingAll({ initialData }: TrendingAllProps) {
+const TRENDING_TYPES = [
+  { id: 'all', label: 'Top Anime', sub: 'Highest rated anime series of all time' },
+  { id: 'bypopularity', label: 'Most Popular', sub: 'Most added to users lists' },
+  { id: 'favorite', label: 'Most Favorited', sub: 'Anime with the most user favorites' },
+  { id: 'airing', label: 'Top Airing', sub: 'Highest rated currently airing shows' },
+  { id: 'upcoming', label: 'Top Upcoming', sub: 'Most anticipated future releases' },
+];
+
+export default function TrendingAll({ initialData, currentType }: TrendingAllProps) {
   const { lists, watchedEps, setListFor, removeFrom } = useStore();
   const [localData, setLocalData] = useState<TrendingItem[]>(initialData);
   const [count, setCount] = useState(12);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const total = localData.length;
+
+  const currentInfo = TRENDING_TYPES.find((t) => t.id === currentType) || TRENDING_TYPES[0];
+
+  // Update localData when initialData changes (e.g. navigation)
+  useEffect(() => {
+    setLocalData(initialData);
+    setCount(12);
+  }, [initialData]);
 
   const handleSetList = async (id: string, key: string) => {
     setLocalData((prev) =>
@@ -77,25 +94,27 @@ export default function TrendingAll({ initialData }: TrendingAllProps) {
     <main className="page">
       <div className="ta-head">
         <div>
-          <h1 className="ta-title">Trending now</h1>
+          <h1 className="ta-title">{currentInfo.label}</h1>
           <p className="ta-sub">
-            Top across the community · Showing {items.length} of {total} · Updated just now
+            {currentInfo.sub} · Showing {items.length} of {total}
           </p>
-        </div>
-        <div className="ta-sort">
-          <span className="ta-sort-label">Sort</span>
-          <select className="ta-sort-select" defaultValue="trending">
-            <option value="trending">Trending score</option>
-            <option value="rank">Ranking</option>
-            <option value="score">User score</option>
-            <option value="recent">Recently aired</option>
-          </select>
         </div>
       </div>
 
-      <Link href="/" className="ghost-btn" style={{ marginBottom: 24, display: 'inline-flex' }}>
-        <span>←</span> Back to dashboard
-      </Link>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, flexWrap: 'wrap', gap: 16 }}>
+        <div className="filters" style={{ marginBottom: 0 }}>
+          {TRENDING_TYPES.map((type) => (
+            <Link
+              key={type.id}
+              href={`/trending?type=${type.id}`}
+              className={`filter-chip ${currentType === type.id ? 'is-active' : ''}`}
+              scroll={false}
+            >
+              {type.label}
+            </Link>
+          ))}
+        </div>
+      </div>
 
       <div className="ta-list">
         {items.map((item, i) => (
@@ -117,8 +136,8 @@ export default function TrendingAll({ initialData }: TrendingAllProps) {
             Loading more…
           </div>
         )}
-        {count >= total && total > 0 && <div className="ta-end">You&apos;ve reached the end of trending.</div>}
-        {total === 0 && <div className="ta-end">No trending data available at the moment.</div>}
+        {count >= total && total > 0 && <div className="ta-end">You&apos;ve reached the end.</div>}
+        {total === 0 && <div className="ta-end">No data available at the moment.</div>}
       </div>
     </main>
   );

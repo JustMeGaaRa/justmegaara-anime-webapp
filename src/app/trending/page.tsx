@@ -2,6 +2,7 @@ import TopBar from '@/components/TopBar';
 import TrendingAll from '@/components/TrendingAll';
 import Toast from '@/components/Toast';
 import { MAL } from '@/lib/mal';
+import type { AnimeRankingType } from '@/lib/mal/types';
 import { mapMALAnime, mapListStatus } from '@/lib/mapper';
 import { cookies } from 'next/headers';
 
@@ -26,7 +27,12 @@ const ANIME_FIELDS = [
   'my_list_status',
 ].join(',');
 
-export default async function TrendingPage() {
+export default async function TrendingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string }>;
+}) {
+  const { type = 'all' } = await searchParams;
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('mal_access_token')?.value;
   const clientId = process.env.MAL_CLIENT_ID;
@@ -34,12 +40,14 @@ export default async function TrendingPage() {
   let userInfo = null;
   let trendingData = [];
 
+  const rankingType = (type || 'all') as AnimeRankingType;
+
   try {
     const mal = new MAL(accessToken ? { accessToken } : { clientId: clientId! });
 
     const promises: [Promise<any>, Promise<any>] = [
       mal.anime.getRanking({
-        ranking_type: 'all',
+        ranking_type: rankingType,
         limit: 50,
         fields: ANIME_FIELDS,
       }),
@@ -61,7 +69,7 @@ export default async function TrendingPage() {
   return (
     <>
       <TopBar userInfo={userInfo} />
-      <TrendingAll initialData={trendingData} />
+      <TrendingAll initialData={trendingData} currentType={rankingType} />
       <Toast />
     </>
   );

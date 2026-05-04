@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ANIME, ANIME_BY_ID, FILTERS, RECENTLY_WATCHED_IDS } from '@/lib/data';
 import { useStore } from '@/lib/store';
 import type { MALProfileData, MALListItem } from '@/app/page';
-import type { ListKey } from '@/lib/types';
+import type { Anime, ListKey } from '@/lib/types';
 import AnimeCard from './AnimeCard';
 import HorizontalScroller from './HorizontalScroller';
 import { updateAnimeStatus, deleteAnimeFromList } from '@/app/actions';
@@ -215,9 +215,9 @@ export default function Dashboard({ malData }: DashboardProps) {
                 title={sortOrder === 'asc' ? 'Sort Ascending' : 'Sort Descending'}
               >
                 {sortOrder === 'asc' ? (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M11 12h10"/><path d="M11 16h7"/><path d="M11 20h4"/><path d="M11 8h10"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 8 4-4 4 4" /><path d="M7 4v16" /><path d="M11 12h10" /><path d="M11 16h7" /><path d="M11 20h4" /><path d="M11 8h10" /></svg>
                 ) : (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M11 12h10"/><path d="M11 16h7"/><path d="M11 20h4"/><path d="M11 8h10"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 16 4 4 4-4" /><path d="M7 20V4" /><path d="M11 12h10" /><path d="M11 16h7" /><path d="M11 20h4" /><path d="M11 8h10" /></svg>
                 )}
               </button>
             </div>
@@ -271,7 +271,7 @@ export default function Dashboard({ malData }: DashboardProps) {
 
       <div style={{ textAlign: 'center', marginTop: 8 }}>
         <Link href="/trending" className="action-link" style={{ display: 'inline-flex' }}>
-          Browse trending <span>→</span>
+          Browse top anime <span>→</span>
         </Link>
       </div>
     </main>

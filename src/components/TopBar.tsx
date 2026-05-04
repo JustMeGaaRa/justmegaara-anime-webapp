@@ -81,7 +81,7 @@ export default function TopBar({ userInfo }: TopBarProps) {
             href="/trending"
             className={'topnav-link' + (pathname === '/trending' ? ' is-active' : '')}
           >
-            Trending
+            Top Anime
           </Link>
         </nav>
         <div className="topbar-right">
