@@ -4,6 +4,7 @@ import Toast from '@/components/Toast';
 import { MAL } from '@/lib/mal';
 import { mapMALAnime } from '@/lib/mapper';
 import { cookies } from 'next/headers';
+import type { Anime, User } from '@/lib/mal/types';
 
 const ANIME_FIELDS = [
   'id',
@@ -36,11 +37,10 @@ export default async function AnimePage({ params }: { params: Promise<{ id: stri
 
   let userInfo = null;
   let animeData = null;
-
   try {
     const mal = new MAL(accessToken ? { accessToken } : { clientId: clientId! });
 
-    const promises: [Promise<any>, Promise<any>] = [
+    const promises: [Promise<Anime>, Promise<User | null>] = [
       mal.anime.getById(Number(id), ANIME_FIELDS),
       accessToken ? mal.user.getMyInfo('id,name,picture') : Promise.resolve(null),
     ];

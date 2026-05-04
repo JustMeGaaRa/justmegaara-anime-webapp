@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/lib/store';
 import AnimeCard from './AnimeCard';
@@ -36,11 +36,6 @@ export default function TrendingAll({ initialData, currentType }: TrendingAllPro
 
   const currentInfo = TRENDING_TYPES.find((t) => t.id === currentType) || TRENDING_TYPES[0];
 
-  // Update localData when initialData changes (e.g. navigation)
-  useEffect(() => {
-    setLocalData(initialData);
-    setCount(12);
-  }, [initialData]);
 
   const handleSetList = async (id: string, key: string) => {
     setLocalData((prev) =>

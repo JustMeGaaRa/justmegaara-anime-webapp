@@ -4,6 +4,14 @@ import Toast from '@/components/Toast';
 import { MAL } from '@/lib/mal';
 import { mapMALAnime, mapListStatus } from '@/lib/mapper';
 import { cookies } from 'next/headers';
+import type { PaginatedResponse, Anime as MALAnime, User } from '@/lib/mal/types';
+import type { ListKey, Anime } from '@/lib/types';
+
+interface SearchItem {
+  anime: Anime;
+  listKey: ListKey | null;
+  watchedEps: number;
+}
 
 const ANIME_FIELDS = [
   'id',
@@ -36,14 +44,14 @@ export default async function SearchPage({ searchParams }: PageProps) {
   const accessToken = cookieStore.get('mal_access_token')?.value;
   const clientId = process.env.MAL_CLIENT_ID;
 
-  let userInfo = null;
-  let searchData = [];
+  let userInfo: User | null = null;
+  let searchData: SearchItem[] = [];
 
   if (query) {
     try {
       const mal = new MAL(accessToken ? { accessToken } : { clientId: clientId! });
 
-      const promises: [Promise<any>, Promise<any>] = [
+      const promises: [Promise<PaginatedResponse<{ node: MALAnime }>>, Promise<User | null>] = [
         mal.anime.search({
           q: query,
           limit: 50,
@@ -54,7 +62,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
       const [searchResponse, user] = await Promise.all(promises);
 
-      searchData = searchResponse.data.map((item: any) => ({
+      searchData = searchResponse.data.map((item) => ({
         anime: mapMALAnime(item.node),
         listKey: item.node.my_list_status ? mapListStatus(item.node.my_list_status.status) : null,
         watchedEps: item.node.my_list_status?.num_episodes_watched ?? 0,

@@ -24,20 +24,27 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const savedLists = localStorage.getItem('justmegaara_lists');
     const savedEps = localStorage.getItem('justmegaara_watchedEps');
-    if (savedLists) {
-      try {
-        setLists((prev) => ({ ...prev, ...JSON.parse(savedLists) }));
-      } catch (e) {
-        console.error('Failed to parse saved lists', e);
+
+    // Use setTimeout to avoid synchronous setState during effect, which triggers lint warnings
+    // and can cause cascading renders. This is safe for hydration as it happens after the first render.
+    const timer = setTimeout(() => {
+      if (savedLists) {
+        try {
+          setLists((prev) => ({ ...prev, ...JSON.parse(savedLists) }));
+        } catch (e) {
+          console.error('Failed to parse saved lists', e);
+        }
       }
-    }
-    if (savedEps) {
-      try {
-        setWatchedEps((prev) => ({ ...prev, ...JSON.parse(savedEps) }));
-      } catch (e) {
-        console.error('Failed to parse saved eps', e);
+      if (savedEps) {
+        try {
+          setWatchedEps((prev) => ({ ...prev, ...JSON.parse(savedEps) }));
+        } catch (e) {
+          console.error('Failed to parse saved eps', e);
+        }
       }
-    }
+    }, 0);
+
+    return () => clearTimeout(timer);
   }, []);
 
   // Save to localStorage when changed

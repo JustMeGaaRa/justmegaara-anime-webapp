@@ -16,12 +16,12 @@ export default function TopBar({ userInfo }: TopBarProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const q = searchParams.get('q') || '';
 
-  useEffect(() => {
-    setSearchQuery(searchParams.get('q') || '');
-  }, [searchParams]);
+  // We use local state for the input but reset it when the URL changes via the key prop below
+  const [searchQuery, setSearchQuery] = useState(q);
 
   const initials = userInfo?.name
     ? userInfo.name.slice(0, 2).toUpperCase()
@@ -45,8 +45,6 @@ export default function TopBar({ userInfo }: TopBarProps) {
     await logout();
     setIsMenuOpen(false);
   };
-
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -91,9 +89,10 @@ export default function TopBar({ userInfo }: TopBarProps) {
               <path d="M11 11 L14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
             <input
+              key={q}
               ref={searchInputRef}
               placeholder="Search titles…"
-              value={searchQuery}
+              defaultValue={q}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearch}
             />

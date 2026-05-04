@@ -5,6 +5,14 @@ import { MAL } from '@/lib/mal';
 import type { AnimeRankingType } from '@/lib/mal/types';
 import { mapMALAnime, mapListStatus } from '@/lib/mapper';
 import { cookies } from 'next/headers';
+import type { PaginatedResponse, Anime as MALAnime, User, RankedItem } from '@/lib/mal/types';
+import type { ListKey, Anime } from '@/lib/types';
+
+interface TrendingItem {
+  anime: Anime;
+  listKey: ListKey | null;
+  watchedEps: number;
+}
 
 const ANIME_FIELDS = [
   'id',
@@ -37,15 +45,15 @@ export default async function TrendingPage({
   const accessToken = cookieStore.get('mal_access_token')?.value;
   const clientId = process.env.MAL_CLIENT_ID;
 
-  let userInfo = null;
-  let trendingData = [];
+  let userInfo: User | null = null;
+  let trendingData: TrendingItem[] = [];
 
   const rankingType = (type || 'all') as AnimeRankingType;
 
   try {
     const mal = new MAL(accessToken ? { accessToken } : { clientId: clientId! });
 
-    const promises: [Promise<any>, Promise<any>] = [
+    const promises: [Promise<PaginatedResponse<RankedItem<MALAnime>>>, Promise<User | null>] = [
       mal.anime.getRanking({
         ranking_type: rankingType,
         limit: 50,
@@ -56,7 +64,7 @@ export default async function TrendingPage({
 
     const [rankingResponse, user] = await Promise.all(promises);
 
-    trendingData = rankingResponse.data.map((item: any) => ({
+    trendingData = rankingResponse.data.map((item: { node: MALAnime }) => ({
       anime: mapMALAnime(item.node),
       listKey: item.node.my_list_status ? mapListStatus(item.node.my_list_status.status) : null,
       watchedEps: item.node.my_list_status?.num_episodes_watched ?? 0,
@@ -69,7 +77,7 @@ export default async function TrendingPage({
   return (
     <>
       <TopBar userInfo={userInfo} />
-      <TrendingAll initialData={trendingData} currentType={rankingType} />
+      <TrendingAll key={rankingType} initialData={trendingData} currentType={rankingType} />
       <Toast />
     </>
   );

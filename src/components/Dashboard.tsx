@@ -203,7 +203,7 @@ export default function Dashboard({ malData }: DashboardProps) {
               <select
                 className="ta-sort-select"
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as 'name' | 'release_date' | 'date_added')}
               >
                 <option value="date_added">Date Added</option>
                 <option value="name">Name</option>
