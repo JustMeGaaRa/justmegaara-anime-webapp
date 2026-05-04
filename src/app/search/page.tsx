@@ -68,7 +68,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
   return (
     <>
       <TopBar userInfo={userInfo} />
-      <SearchResults query={query || ''} initialData={searchData} />
+      <SearchResults key={query} query={query || ''} initialData={searchData} />
       <Toast />
     </>
   );
