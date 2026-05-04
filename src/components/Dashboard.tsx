@@ -27,6 +27,8 @@ interface DashboardProps {
 export default function Dashboard({ malData }: DashboardProps) {
   const { lists, watchedEps, setListFor, removeFrom } = useStore();
   const [activeFilter, setActiveFilter] = useState('watching');
+  const [sortBy, setSortBy] = useState<'name' | 'release_date' | 'date_added'>('date_added');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
   // Local copy of MAL list so UI updates (move/remove) are reflected immediately
   const [malList, setMalList] = useState<MALListItem[] | null>(malData?.animeList ?? null);
@@ -102,15 +104,39 @@ export default function Dashboard({ malData }: DashboardProps) {
     return RECENTLY_WATCHED_IDS.map((id) => ANIME_BY_ID[id]).filter(Boolean).slice(0, 12);
   }, [malList]);
 
-  // My list filtered by active tab
+  // My list filtered and sorted
   const filteredMyList = useMemo(() => {
+    let items: { anime: Anime; updatedAt?: string }[] = [];
+
     if (malList) {
-      return malList
+      items = malList
         .filter((item) => item.listKey === activeFilter)
-        .map((item) => item.anime);
+        .map((item) => ({ anime: item.anime, updatedAt: item.updatedAt }));
+    } else {
+      items = ANIME
+        .filter((a) => lists[a.id] === activeFilter)
+        .map((a) => ({ anime: a }));
     }
-    return ANIME.filter((a) => lists[a.id] === activeFilter);
-  }, [malList, lists, activeFilter]);
+
+    return items
+      .sort((a, b) => {
+        let result = 0;
+        if (sortBy === 'name') {
+          result = a.anime.title.localeCompare(b.anime.title);
+        } else if (sortBy === 'release_date') {
+          const dateA = a.anime.startDate || `${a.anime.year}-01-01`;
+          const dateB = b.anime.startDate || `${b.anime.year}-01-01`;
+          result = dateA.localeCompare(dateB);
+        } else if (sortBy === 'date_added') {
+          const timeA = a.updatedAt ? new Date(a.updatedAt).getTime() : 0;
+          const timeB = b.updatedAt ? new Date(b.updatedAt).getTime() : 0;
+          result = timeA - timeB;
+        }
+
+        return sortOrder === 'asc' ? result : -result;
+      })
+      .map((item) => item.anime);
+  }, [malList, lists, activeFilter, sortBy, sortOrder]);
 
   // Watched episodes per anime id
   const watchedEpsMap = useMemo(() => {
@@ -170,6 +196,31 @@ export default function Dashboard({ malData }: DashboardProps) {
           <div>
             <h2 className="section-title">My list</h2>
             <p className="section-sub">Everything you&apos;re tracking</p>
+          </div>
+          <div className="section-actions">
+            <div className="ta-sort">
+              <span className="ta-sort-label">Sort by</span>
+              <select
+                className="ta-sort-select"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+              >
+                <option value="date_added">Date Added</option>
+                <option value="name">Name</option>
+                <option value="release_date">Release Date</option>
+              </select>
+              <button
+                className="sort-toggle"
+                onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+                title={sortOrder === 'asc' ? 'Sort Ascending' : 'Sort Descending'}
+              >
+                {sortOrder === 'asc' ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/><path d="M11 12h10"/><path d="M11 16h7"/><path d="M11 20h4"/><path d="M11 8h10"/></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="M11 12h10"/><path d="M11 16h7"/><path d="M11 20h4"/><path d="M11 8h10"/></svg>
+                )}
+              </button>
+            </div>
           </div>
         </header>
         <div className="filters" role="tablist" aria-label="Filter my list">

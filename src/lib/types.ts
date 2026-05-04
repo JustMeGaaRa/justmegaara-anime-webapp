@@ -24,6 +24,7 @@ export interface Anime {
   source: string;
   duration: number;
   year: number;
+  startDate?: string;
   synopsis: string;
   seasons: AnimeSeason[];
   relatedIds: string[];

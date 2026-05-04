@@ -50,6 +50,7 @@ export function mapMALAnime(mal: MALAnime): Anime {
       ? Math.round(mal.average_episode_duration / 60)
       : 0,
     year: mal.start_season?.year ?? 0,
+    startDate: mal.start_date,
     synopsis: mal.synopsis ?? "",
     seasons: [
       {
