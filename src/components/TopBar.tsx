@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { User } from '@/lib/mal';
 import { logout } from '@/app/actions';
 
@@ -13,8 +13,15 @@ interface TopBarProps {
 
 export default function TopBar({ userInfo }: TopBarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('q') || '');
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSearchQuery(searchParams.get('q') || '');
+  }, [searchParams]);
 
   const initials = userInfo?.name
     ? userInfo.name.slice(0, 2).toUpperCase()
@@ -37,6 +44,25 @@ export default function TopBar({ userInfo }: TopBarProps) {
   const handleLogout = async () => {
     await logout();
     setIsMenuOpen(false);
+  };
+
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
   };
 
   return (
@@ -64,7 +90,13 @@ export default function TopBar({ userInfo }: TopBarProps) {
               <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.6" />
               <path d="M11 11 L14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
-            <input placeholder="Search 24,193 titles…" />
+            <input
+              ref={searchInputRef}
+              placeholder="Search titles…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
+            />
             <span className="search-kbd">⌘K</span>
           </div>
           {userInfo ? (

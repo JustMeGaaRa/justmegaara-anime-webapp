@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ANIME_BY_ID, LIST_LABELS, LIST_ORDER } from '@/lib/data';
 import { useStore } from '@/lib/store';
 import AnimeCard from './AnimeCard';
@@ -227,6 +228,7 @@ function SeasonsList({ anime }: { anime: Anime }) {
 }
 
 export default function DetailView({ initialAnime }: { initialAnime: Anime | null }) {
+  const router = useRouter();
   const { lists, watchedEps, setListFor, removeFrom } = useStore();
   const anime = initialAnime;
 
@@ -239,9 +241,9 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
   if (!anime) {
     return (
       <main className="page page--detail">
-        <Link href="/" className="ghost-btn dt-back">
-          ← Back to dashboard
-        </Link>
+        <button onClick={() => router.back()} className="ghost-btn dt-back">
+          ← Back
+        </button>
         <div className="empty">
           <div className="empty-mark">...</div>
           <div className="empty-title">Loading anime data...</div>
@@ -276,9 +278,9 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
 
   return (
     <main className="page page--detail">
-      <Link href="/" className="ghost-btn dt-back" style={{ display: 'inline-flex' }}>
-        <span>←</span> Back to dashboard
-      </Link>
+      <button onClick={() => router.back()} className="ghost-btn dt-back" style={{ display: 'inline-flex' }}>
+        <span>←</span> Back
+      </button>
       <DetailHero
         anime={anime}
         currentList={currentList}
