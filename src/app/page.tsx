@@ -3,7 +3,7 @@ import Dashboard from '@/components/Dashboard';
 import Toast from '@/components/Toast';
 import { MAL } from '@/lib/mal';
 import type { User } from '@/lib/mal';
-import { mapMALAnime, mapListStatus } from '@/lib/mal/mapper';
+import { mapMALAnime, mapListStatus } from '@/lib/mapper';
 import type { Anime, ListKey } from '@/lib/types';
 
 export interface MALListItem {
@@ -22,6 +22,7 @@ const ANIME_FIELDS = [
   'id',
   'title',
   'main_picture',
+  'alternative_titles',
   'synopsis',
   'mean',
   'rank',

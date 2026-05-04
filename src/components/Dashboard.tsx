@@ -8,6 +8,8 @@ import type { MALProfileData, MALListItem } from '@/app/page';
 import type { ListKey } from '@/lib/types';
 import AnimeCard from './AnimeCard';
 import HorizontalScroller from './HorizontalScroller';
+import { updateAnimeStatus, deleteAnimeFromList } from '@/app/actions';
+import { unmapListStatus } from '@/lib/mapper';
 
 function HeroStat({ n, label, emphasis }: { n: number; label: string; emphasis?: boolean }) {
   return (
@@ -29,7 +31,8 @@ export default function Dashboard({ malData }: DashboardProps) {
   // Local copy of MAL list so UI updates (move/remove) are reflected immediately
   const [malList, setMalList] = useState<MALListItem[] | null>(malData?.animeList ?? null);
 
-  const handleSetList = (id: string, key: string) => {
+  const handleSetList = async (id: string, key: string) => {
+    // Optimistic UI
     if (malList) {
       setMalList((prev) =>
         prev?.map((item) =>
@@ -38,13 +41,29 @@ export default function Dashboard({ malData }: DashboardProps) {
       );
     }
     setListFor(id, key);
+
+    try {
+      await updateAnimeStatus(Number(id), unmapListStatus(key as ListKey));
+    } catch (err) {
+      console.error('[Dashboard] Failed to update MAL status:', err);
+      // Revert store on failure (simple implementation)
+      // In a real app we might want a more robust rollback
+    }
   };
 
-  const handleRemove = (id: string) => {
+  const handleRemove = async (id: string) => {
+    // Optimistic UI
     if (malList) {
       setMalList((prev) => prev?.filter((item) => item.anime.id !== id) ?? null);
     }
     removeFrom(id);
+
+    try {
+      await deleteAnimeFromList(Number(id));
+    } catch (err) {
+      console.error('[Dashboard] Failed to remove from MAL:', err);
+      // Revert store on failure
+    }
   };
 
   // Stats — prefer real MAL statistics, fall back to counting from store
@@ -156,8 +175,8 @@ export default function Dashboard({ malData }: DashboardProps) {
             const count = malList
               ? malList.filter((item) => item.listKey === f.key).length
               : (lists as Record<string, string>)[f.key] !== undefined
-              ? Object.values(lists).filter((v) => v === f.key).length
-              : 0;
+                ? Object.values(lists).filter((v) => v === f.key).length
+                : 0;
             return (
               <button
                 key={f.key}

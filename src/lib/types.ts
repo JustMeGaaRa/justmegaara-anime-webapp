@@ -27,6 +27,8 @@ export interface Anime {
   synopsis: string;
   seasons: AnimeSeason[];
   relatedIds: string[];
+  listKey?: ListKey;
+  watchedEps?: number;
 }
 
 export type Lists = Record<string, ListKey>;

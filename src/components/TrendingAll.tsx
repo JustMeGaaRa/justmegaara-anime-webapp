@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useStore } from '@/lib/store';
 import AnimeCard from './AnimeCard';
 import type { Anime, ListKey } from '@/lib/types';
+import { updateAnimeStatus, deleteAnimeFromList } from '@/app/actions';
+import { unmapListStatus } from '@/lib/mapper';
 
 interface TrendingItem {
   anime: Anime;
@@ -23,22 +25,34 @@ export default function TrendingAll({ initialData }: TrendingAllProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const total = localData.length;
 
-  const handleSetList = (id: string, key: string) => {
+  const handleSetList = async (id: string, key: string) => {
     setLocalData((prev) =>
       prev.map((item) =>
         item.anime.id === id ? { ...item, listKey: key as ListKey } : item,
       ),
     );
     setListFor(id, key);
+
+    try {
+      await updateAnimeStatus(Number(id), unmapListStatus(key as ListKey));
+    } catch (err) {
+      console.error('[TrendingAll] Failed to update MAL status:', err);
+    }
   };
 
-  const handleRemove = (id: string) => {
+  const handleRemove = async (id: string) => {
     setLocalData((prev) =>
       prev.map((item) =>
         item.anime.id === id ? { ...item, listKey: null, watchedEps: 0 } : item,
       ),
     );
     removeFrom(id);
+
+    try {
+      await deleteAnimeFromList(Number(id));
+    } catch (err) {
+      console.error('[TrendingAll] Failed to remove from MAL:', err);
+    }
   };
 
   useEffect(() => {

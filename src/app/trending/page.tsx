@@ -2,13 +2,14 @@ import TopBar from '@/components/TopBar';
 import TrendingAll from '@/components/TrendingAll';
 import Toast from '@/components/Toast';
 import { MAL } from '@/lib/mal';
-import { mapMALAnime, mapListStatus } from '@/lib/mal/mapper';
+import { mapMALAnime, mapListStatus } from '@/lib/mapper';
 import { cookies } from 'next/headers';
 
 const ANIME_FIELDS = [
   'id',
   'title',
   'main_picture',
+  'alternative_titles',
   'synopsis',
   'mean',
   'rank',

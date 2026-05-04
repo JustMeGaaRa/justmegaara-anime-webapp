@@ -2,13 +2,14 @@ import TopBar from '@/components/TopBar';
 import DetailView from '@/components/DetailView';
 import Toast from '@/components/Toast';
 import { MAL } from '@/lib/mal';
-import { mapMALAnime } from '@/lib/mal/mapper';
+import { mapMALAnime } from '@/lib/mapper';
 import { cookies } from 'next/headers';
 
 const ANIME_FIELDS = [
   'id',
   'title',
   'main_picture',
+  'alternative_titles',
   'synopsis',
   'mean',
   'rank',

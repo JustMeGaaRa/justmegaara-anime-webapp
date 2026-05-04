@@ -6,7 +6,9 @@ import { ANIME_BY_ID, LIST_LABELS, LIST_ORDER } from '@/lib/data';
 import { useStore } from '@/lib/store';
 import AnimeCard from './AnimeCard';
 import HorizontalScroller from './HorizontalScroller';
-import type { Anime } from '@/lib/types';
+import type { Anime, ListKey } from '@/lib/types';
+import { updateAnimeStatus, deleteAnimeFromList } from '@/app/actions';
+import { unmapListStatus } from '@/lib/mapper';
 
 function DetailAttr({ label, value }: { label: string; value: string }) {
   return (
@@ -180,7 +182,6 @@ function DetailHero({
             ) : (
               <button className="dt-btn dt-btn--primary">▶ Watch Now</button>
             )}
-            <button className="dt-btn dt-btn--ghost">Details ›</button>
             <ListSwitcher current={currentList} onSetList={onSetList} onRemove={onRemove} />
           </div>
           <div className="dt-attrs">
@@ -229,6 +230,12 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
   const { lists, watchedEps, setListFor, removeFrom } = useStore();
   const anime = initialAnime;
 
+  useEffect(() => {
+    if (anime && anime.listKey && !lists[anime.id]) {
+      setListFor(anime.id, anime.listKey);
+    }
+  }, [anime, lists, setListFor]);
+
   if (!anime) {
     return (
       <main className="page page--detail">
@@ -243,15 +250,26 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
     );
   }
 
-  const handleSetList = (key: string) => {
+  const handleSetList = async (key: string) => {
     setListFor(anime.id, key);
+    try {
+      await updateAnimeStatus(Number(anime.id), unmapListStatus(key as ListKey));
+    } catch (err) {
+      console.error('[DetailView] Failed to update MAL status:', err);
+    }
   };
 
-  const handleRemove = () => {
+  const handleRemove = async () => {
     removeFrom(anime.id);
+    try {
+      await deleteAnimeFromList(Number(anime.id));
+    } catch (err) {
+      console.error('[DetailView] Failed to remove from MAL:', err);
+    }
   };
 
-  const currentList = lists[anime.id] ?? null;
+  const currentList = lists[anime.id] ?? anime.listKey ?? null;
+  const currentWatchedEps = watchedEps[anime.id] ?? anime.watchedEps ?? 0;
   const related = anime.relatedIds
     .map((id) => ANIME_BY_ID[id])
     .filter((a): a is Anime => !!a);
@@ -264,7 +282,7 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
       <DetailHero
         anime={anime}
         currentList={currentList}
-        watchedEps={watchedEps[anime.id] ?? 0}
+        watchedEps={currentWatchedEps}
         onSetList={handleSetList}
         onRemove={handleRemove}
       />
@@ -284,8 +302,22 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
                   anime={a}
                   currentList={lists[a.id] ?? null}
                   watchedEps={watchedEps[a.id] ?? 0}
-                  onSetList={(k) => setListFor(a.id, k)}
-                  onRemove={() => removeFrom(a.id)}
+                  onSetList={async (k) => {
+                    setListFor(a.id, k);
+                    try {
+                      await updateAnimeStatus(Number(a.id), unmapListStatus(k as ListKey));
+                    } catch (err) {
+                      console.error('[DetailView] Failed to update related anime status:', err);
+                    }
+                  }}
+                  onRemove={async () => {
+                    removeFrom(a.id);
+                    try {
+                      await deleteAnimeFromList(Number(a.id));
+                    } catch (err) {
+                      console.error('[DetailView] Failed to remove related anime:', err);
+                    }
+                  }}
                 />
               </div>
             ))}
