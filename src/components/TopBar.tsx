@@ -82,22 +82,22 @@ export default function TopBar({ userInfo }: TopBarProps) {
             Top Anime
           </Link>
         </nav>
+        <div className="search">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.6" />
+            <path d="M11 11 L14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+          </svg>
+          <input
+            key={q}
+            ref={searchInputRef}
+            placeholder="Search titles…"
+            defaultValue={q}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={handleSearch}
+          />
+          <span className="search-kbd">⌘K</span>
+        </div>
         <div className="topbar-right">
-          <div className="search">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-              <circle cx="7" cy="7" r="4.5" stroke="currentColor" strokeWidth="1.6" />
-              <path d="M11 11 L14 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            </svg>
-            <input
-              key={q}
-              ref={searchInputRef}
-              placeholder="Search titles…"
-              defaultValue={q}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={handleSearch}
-            />
-            <span className="search-kbd">⌘K</span>
-          </div>
           {userInfo ? (
             <div className="ac-menu" ref={menuRef}>
               <button

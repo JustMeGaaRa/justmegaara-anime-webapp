@@ -61,23 +61,24 @@ img { display: block; max-width: 100%; }
 }
 .topbar-inner {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
-  gap: 32px;
+  gap: 24px;
   max-width: 1320px;
   margin: 0 auto;
-  padding: 14px 32px;
+  padding: 10px 32px;
 }
-.brand { display: flex; align-items: center; }
+.brand { display: flex; align-items: center; flex-shrink: 0; }
 .brand-name {
   font-family: var(--font-outfit), sans-serif;
   font-weight: 600;
   font-size: 15px;
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 .brand-x { color: var(--accent); margin: 0 2px; font-weight: 500; }
 
-.topnav { display: flex; gap: 4px; justify-self: center; }
+.topnav { display: flex; gap: 4px; }
 .topnav-link {
   padding: 8px 14px;
   border-radius: 8px;
@@ -94,13 +95,14 @@ img { display: block; max-width: 100%; }
 .topbar-right { display: flex; align-items: center; gap: 12px; }
 .search {
   display: flex; align-items: center; gap: 8px;
-  width: 280px;
+  width: 240px;
   padding: 8px 12px;
   background: var(--bg-elev);
   border: 1px solid var(--line-soft);
   border-radius: 10px;
   color: var(--fg-3);
   transition: border-color 0.12s, background 0.12s;
+  justify-self: end;
 }
 .search:focus-within { border-color: var(--accent-line); background: var(--bg-elev-2); }
 .search input {
@@ -116,6 +118,10 @@ img { display: block; max-width: 100%; }
   border: 1px solid var(--line);
   border-radius: 4px;
   color: var(--fg-3);
+}
+@media (max-width: 1100px) {
+  .search-kbd { display: none; }
+  .search { width: 180px; }
 }
 .avatar {
   width: 36px; height: 36px;
@@ -254,11 +260,18 @@ img { display: block; max-width: 100%; }
 
 /* ─── filters ────────────────────────────────────────────────────────── */
 .filters {
-  display: flex; flex-wrap: wrap; gap: 8px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 8px;
   margin-bottom: 22px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
 }
+.filters::-webkit-scrollbar { display: none; }
 .filter-chip {
-  display: flex; align-items: center; gap: 8px;
+  display: inline-flex; align-items: center; gap: 8px;
   padding: 9px 14px;
   border-radius: 999px;
   background: var(--bg-elev);
@@ -267,6 +280,8 @@ img { display: block; max-width: 100%; }
   font-size: 13px;
   font-weight: 500;
   transition: background 0.12s, border-color 0.12s, color 0.12s;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .filter-chip:hover { background: var(--bg-elev-2); color: var(--fg); }
 .filter-chip.is-active {
@@ -839,9 +854,34 @@ img { display: block; max-width: 100%; }
 }
 
 @media (max-width: 900px) {
-  .topbar-inner { grid-template-columns: auto 1fr; gap: 16px; padding: 12px 20px; }
-  .topnav { display: none; }
-  .search { width: 200px; }
+  .topbar-inner {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 
+      "brand right"
+      "nav nav";
+    gap: 12px 24px;
+    padding: 12px 20px;
+  }
+  .brand { grid-area: brand; }
+  .topbar-right { grid-area: right; }
+  .topnav {
+    grid-area: nav;
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+    margin: 0 -20px;
+    padding: 4px 20px;
+    border-top: 1px solid var(--line-soft);
+  }
+  .topnav::-webkit-scrollbar { display: none; }
+  .topnav-link { white-space: nowrap; padding: 6px 12px; }
+
+  .search { 
+    grid-area: brand; 
+    margin-right: 48px; /* Leave space for brand */
+    display: none; /* Hidden on medium, shown on small */
+  }
+  
   .page { padding: 24px 20px 100px; }
   .hero { grid-template-columns: 1fr; gap: 20px; align-items: start; }
   .hero-title { font-size: 28px; }
@@ -852,4 +892,25 @@ img { display: block; max-width: 100%; }
   .row-card .ac-card { width: 320px; }
   .ta-rank { font-size: 22px; width: 48px; }
   .ta-row { flex-direction: row; }
+}
+
+@media (max-width: 600px) {
+  .topbar-inner {
+    grid-template-columns: 1fr auto;
+    grid-template-areas: 
+      "brand right" 
+      "search search" 
+      "nav nav";
+    gap: 12px 16px;
+  }
+  .topbar-inner .search {
+    display: flex;
+    grid-area: search;
+    width: 100%;
+    margin: 0;
+  }
+
+  .ta-sort-label { display: none; }
+  .hero-title { font-size: 26px; }
+  .brand-name { font-size: 14px; }
 }
