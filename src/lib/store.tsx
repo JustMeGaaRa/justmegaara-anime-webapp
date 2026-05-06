@@ -8,7 +8,7 @@ interface StoreContextValue {
   lists: Lists;
   watchedEps: WatchedEps;
   toast: string | null;
-  setListFor: (id: string, key: string, title?: string) => void;
+  setListFor: (id: string, key: string, title?: string, silent?: boolean) => void;
   removeFrom: (id: string, title?: string) => void;
   updateWatchedEps: (id: string, eps: number) => void;
 }
@@ -64,10 +64,12 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const setListFor = useCallback(
-    (id: string, key: string, title?: string) => {
+    (id: string, key: string, title?: string, silent?: boolean) => {
       setLists((prev) => ({ ...prev, [id]: key as Lists[string] }));
-      const name = title || ANIME_BY_ID[id]?.title || 'Anime';
-      showToast(`Added "${name}" to ${LIST_LABELS[key]}`);
+      if (!silent) {
+        const name = title || ANIME_BY_ID[id]?.title || 'Anime';
+        showToast(`Added "${name}" to ${LIST_LABELS[key]}`);
+      }
     },
     [showToast],
   );

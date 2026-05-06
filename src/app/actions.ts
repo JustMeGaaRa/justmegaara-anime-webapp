@@ -27,6 +27,28 @@ export async function updateAnimeStatus(animeId: number, status: AnimeStatus) {
   }
 }
 
+export async function updateAnimeEpisodes(animeId: number, num_watched_episodes: number) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('mal_access_token')?.value;
+
+  if (!accessToken) {
+    throw new Error('Not authenticated');
+  }
+
+  const mal = new MAL({ accessToken });
+
+  try {
+    const result = await mal.anime.updateMyListStatus(animeId, { num_watched_episodes });
+    revalidatePath('/');
+    revalidatePath('/trending');
+    revalidatePath(`/anime/${animeId}`);
+    return result;
+  } catch (error) {
+    console.error(`[MAL Action] Failed to update episodes for anime ${animeId}:`, error);
+    throw error;
+  }
+}
+
 export async function deleteAnimeFromList(animeId: number) {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('mal_access_token')?.value;

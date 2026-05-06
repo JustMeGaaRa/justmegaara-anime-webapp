@@ -7,7 +7,7 @@ import { useStore } from '@/lib/store';
 import AnimeCard from './anime/AnimeCard';
 import HorizontalScroller from './HorizontalScroller';
 import type { Anime, ListKey } from '@/lib/types';
-import { updateAnimeStatus, deleteAnimeFromList } from '@/app/actions';
+import { updateAnimeStatus, deleteAnimeFromList, updateAnimeEpisodes } from '@/app/actions';
 import { unmapListStatus } from '@/lib/mapper';
 import { DetailHero } from './anime/DetailHero';
 import { SeasonsList } from './anime/SeasonsList';
@@ -26,7 +26,7 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
       // (which uses setTimeout 0) has completed before we overwrite it with fresh MAL data.
       const timer = setTimeout(() => {
         if (anime.listKey) {
-          setListFor(anime.id, anime.listKey, anime.title);
+          setListFor(anime.id, anime.listKey, anime.title, true);
         }
         if (anime.watchedEps !== undefined) {
           updateWatchedEps(anime.id, anime.watchedEps);
@@ -70,6 +70,15 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
     }
   };
 
+  const handleEpisodeChange = async (ep: number) => {
+    updateWatchedEps(anime.id, ep);
+    try {
+      await updateAnimeEpisodes(Number(anime.id), ep);
+    } catch (err) {
+      console.error('[DetailView] Failed to update MAL episodes:', err);
+    }
+  };
+
   const currentList = !isSynced ? (anime.listKey ?? null) : (lists[anime.id] ?? anime.listKey ?? null);
   const currentWatchedEps = !isSynced ? (anime.watchedEps ?? 0) : ((watchedEps[anime.id] !== undefined) ? watchedEps[anime.id] : (anime.watchedEps ?? 0));
   const related = anime.relatedIds
@@ -92,7 +101,7 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
       <SeasonsList
         anime={anime}
         currentWatchedEps={currentWatchedEps || 0}
-        onEpisodeChange={(ep) => updateWatchedEps(anime.id, ep)}
+        onEpisodeChange={handleEpisodeChange}
       />
       {related.length > 0 && (
         <section className="section">

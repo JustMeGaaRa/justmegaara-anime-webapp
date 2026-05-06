@@ -235,8 +235,8 @@ img { display: block; max-width: 100%; }
 .hscroll::-webkit-scrollbar { height: 6px; }
 .hscroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
 .hscroll::-webkit-scrollbar-track { background: transparent; }
-.row-card { scroll-snap-align: start; flex: 0 0 auto; }
-.row-card .ac-card { width: 380px; }
+.row-card { scroll-snap-align: start; flex: 0 0 auto; display: flex; flex-direction: column; }
+.row-card .ac-card { width: 380px; flex: 1; }
 
 .hscroll-btn {
   position: absolute;
@@ -339,6 +339,7 @@ img { display: block; max-width: 100%; }
   border-radius: var(--radius-lg);
   transition: background 0.12s, border-color 0.12s, transform 0.12s;
   box-shadow: var(--shadow-card);
+  height: 100%;
 }
 .ac-card:hover { background: var(--bg-card-hover); border-color: var(--line); }
 .ac-card--compact { grid-template-columns: 88px 1fr; padding: 10px; gap: 12px; }
@@ -350,6 +351,7 @@ img { display: block; max-width: 100%; }
   border-radius: 10px;
   overflow: hidden;
   background: var(--bg-elev);
+  align-self: start;
 }
 .ac-poster img { width: 100%; height: 100%; object-fit: cover; }
 .ac-rating-pill {
@@ -814,7 +816,8 @@ img { display: block; max-width: 100%; }
   cursor: pointer;
 }
 .dt-season:hover { background: var(--bg-card-hover); border-color: var(--line); }
-.dt-season.is-current { border-color: var(--accent-line); }
+.dt-season.is-current,
+.dt-season.is-expanded { border-color: var(--accent-line); }
 .dt-season-n {
   font-family: var(--font-outfit), sans-serif;
   font-size: 22px;
