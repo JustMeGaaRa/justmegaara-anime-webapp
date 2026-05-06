@@ -1,4 +1,4 @@
-import TopBar from '@/components/TopBar';
+import TopBar from '@/components/layout/TopBar';
 import DetailView from '@/components/DetailView';
 import Toast from '@/components/Toast';
 import { MAL } from '@/lib/mal';

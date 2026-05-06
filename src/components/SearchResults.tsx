@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useStore } from '@/lib/store';
-import AnimeCard from './AnimeCard';
+import AnimeCard from './anime/AnimeCard';
 import type { Anime, ListKey } from '@/lib/types';
 import { updateAnimeStatus, deleteAnimeFromList } from '@/app/actions';
 import { unmapListStatus } from '@/lib/mapper';

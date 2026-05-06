@@ -1,98 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LIST_LABELS, LIST_ORDER } from '@/lib/data';
+import { LIST_LABELS } from '@/lib/data';
 import type { Anime } from '@/lib/types';
-
-function StatusPill({ status }: { status: Anime['status'] }) {
-  const cls =
-    status === 'Currently Airing'
-      ? 'ac-pill ac-pill--airing'
-      : status === 'Upcoming'
-        ? 'ac-pill ac-pill--upcoming'
-        : 'ac-pill';
-  return <span className={cls}>{status}</span>;
-}
-
-interface CardMenuProps {
-  anime: Anime;
-  currentList: string | null;
-  onSetList: (key: string) => void;
-  onRemove: () => void;
-}
-
-function CardMenu({ anime, currentList, onSetList, onRemove }: CardMenuProps) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [open]);
-
-  return (
-    <div className="ac-menu" ref={ref}>
-      <button
-        className="ac-menu-trigger"
-        aria-label={`Manage ${anime.title}`}
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen((v) => !v);
-        }}
-      >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-          <circle cx="3" cy="8" r="1.4" fill="currentColor" />
-          <circle cx="8" cy="8" r="1.4" fill="currentColor" />
-          <circle cx="13" cy="8" r="1.4" fill="currentColor" />
-        </svg>
-      </button>
-      {open && (
-        <div
-          className="ac-menu-pop"
-          onClick={(e) => e.stopPropagation()}
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          <div className="ac-menu-label">Move to list</div>
-          {LIST_ORDER.map((key) => (
-            <button
-              key={key}
-              className={'ac-menu-item' + (currentList === key ? ' is-active' : '')}
-              onClick={(e) => {
-                e.stopPropagation();
-                onSetList(key);
-                setOpen(false);
-              }}
-            >
-              <span className={'ac-dot ac-dot--' + key}></span>
-              {LIST_LABELS[key]}
-              {currentList === key && <span className="ac-menu-check">✓</span>}
-            </button>
-          ))}
-          {currentList && (
-            <>
-              <div className="ac-menu-sep"></div>
-              <button
-                className="ac-menu-item ac-menu-item--danger"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove();
-                  setOpen(false);
-                }}
-              >
-                Remove from my list
-              </button>
-            </>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
+import { Badge } from '../ui/Badge';
+import { CardMenu } from './CardMenu';
 
 interface AnimeCardProps {
   anime: Anime;
@@ -128,6 +40,10 @@ export default function AnimeCard({
     }
   };
 
+  let statusVariant: 'default' | 'airing' | 'upcoming' = 'default';
+  if (anime.status === 'Currently Airing') statusVariant = 'airing';
+  else if (anime.status === 'Upcoming') statusVariant = 'upcoming';
+
   return (
     <article
       className={'ac-card ac-card--' + density + (clickable ? ' ac-card--clickable' : '')}
@@ -152,7 +68,7 @@ export default function AnimeCard({
       <div className="ac-body">
         <div className="ac-body-top">
           <div className="ac-body-badges">
-            <StatusPill status={anime.status} />
+            <Badge variant={statusVariant}>{anime.status}</Badge>
             {showListStatus && currentList && (
               <div className="ac-list-tag">
                 <span className={`ac-dot ac-dot--${currentList}`}></span>

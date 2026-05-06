@@ -28,10 +28,6 @@ export const EpisodeGrid: React.FC<EpisodeGridProps> = ({
           <span>Watched</span>
         </div>
         <div className="et-legend-item">
-          <div className="et-box et-box--current"></div>
-          <span>Next up</span>
-        </div>
-        <div className="et-legend-item">
           <div className="et-box et-box--unwatched"></div>
           <span>Not yet watched</span>
         </div>
@@ -39,9 +35,9 @@ export const EpisodeGrid: React.FC<EpisodeGridProps> = ({
 
       <div className="et-grid">
         {episodes.map((ep) => {
-          let stateClass = 'et-ep--unwatched';
-          if (ep <= watchedCount) stateClass = 'et-ep--watched';
-          else if (ep === watchedCount + 1) stateClass = 'et-ep--current';
+          const stateClass = ep <= watchedCount
+            ? 'et-ep--watched'
+            : 'et-ep--unwatched';
 
           return (
             <button

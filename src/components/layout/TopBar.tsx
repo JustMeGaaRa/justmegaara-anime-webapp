@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type { User } from '@/lib/mal';
 import { logout } from '@/app/actions';
+import { DropdownMenu } from '../ui/DropdownMenu';
 
 interface TopBarProps {
   userInfo?: User | null;
@@ -15,9 +16,7 @@ export default function TopBar({ userInfo }: TopBarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const q = searchParams.get('q') || '';
 
   // We use local state for the input but reset it when the URL changes via the key prop below
@@ -27,23 +26,8 @@ export default function TopBar({ userInfo }: TopBarProps) {
     ? userInfo.name.slice(0, 2).toUpperCase()
     : 'JM';
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsMenuOpen(false);
-      }
-    }
-    if (isMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isMenuOpen]);
-
   const handleLogout = async () => {
     await logout();
-    setIsMenuOpen(false);
   };
 
   useEffect(() => {
@@ -99,10 +83,9 @@ export default function TopBar({ userInfo }: TopBarProps) {
         </div>
         <div className="topbar-right">
           {userInfo ? (
-            <div className="ac-menu" ref={menuRef}>
-              <button
+            <DropdownMenu className="ac-menu">
+              <DropdownMenu.Trigger
                 className="avatar-trigger"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
                 style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
               >
                 {userInfo.picture ? (
@@ -120,23 +103,23 @@ export default function TopBar({ userInfo }: TopBarProps) {
                     {initials}
                   </div>
                 )}
-              </button>
+              </DropdownMenu.Trigger>
 
-              {isMenuOpen && (
-                <div className="ac-menu-pop profile-dropdown" style={{ minWidth: '180px' }}>
-                  <div className="ac-menu-label">User</div>
-                  <div className="ac-menu-item" style={{ cursor: 'default' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <div style={{ fontWeight: 600, color: 'var(--fg)' }}>{userInfo.name}</div>
-                      <div style={{ fontSize: '11px', color: 'var(--fg-3)' }}>MyAnimeList Profile</div>
-                    </div>
+              <DropdownMenu.Content className="ac-menu-pop profile-dropdown" style={{ minWidth: '180px' }}>
+                <DropdownMenu.Label>User</DropdownMenu.Label>
+                <div className="ac-menu-item" style={{ cursor: 'default' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--fg)' }}>{userInfo.name}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--fg-3)' }}>MyAnimeList Profile</div>
                   </div>
-                  <div className="ac-menu-sep" />
-                  <button
-                    className="ac-menu-item ac-menu-item--danger"
-                    onClick={handleLogout}
-                    style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}
-                  >
+                </div>
+                <DropdownMenu.Separator />
+                <DropdownMenu.Item
+                  variant="danger"
+                  onClick={handleLogout}
+                  style={{ width: '100%', background: 'none', border: 'none', textAlign: 'left', cursor: 'pointer' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
                     <svg
                       width="14"
                       height="14"
@@ -153,10 +136,10 @@ export default function TopBar({ userInfo }: TopBarProps) {
                       <line x1="21" y1="12" x2="9" y2="12" />
                     </svg>
                     Logout
-                  </button>
-                </div>
-              )}
-            </div>
+                  </div>
+                </DropdownMenu.Item>
+              </DropdownMenu.Content>
+            </DropdownMenu>
           ) : (
             <Link
               href="/auth/login"
