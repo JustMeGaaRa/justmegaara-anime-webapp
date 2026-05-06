@@ -144,7 +144,7 @@ export default function AnimeCard({
           <div className="ac-progress">
             <div
               className="ac-progress-bar"
-              style={{ width: `${Math.min(100, (watchedEps / anime.episodes) * 100)}%` }}
+              style={{ width: `${anime.episodes > 0 ? Math.min(100, (watchedEps / anime.episodes) * 100) : 0}%` }}
             />
           </div>
         )}
@@ -187,7 +187,7 @@ export default function AnimeCard({
         </div>
         {currentList === 'watching' && (
           <div className="ac-eps">
-            Ep {watchedEps} / {anime.episodes}
+            Ep {watchedEps} / {anime.episodes || '?'}
           </div>
         )}
         <div className="ac-badges">

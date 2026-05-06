@@ -9,6 +9,7 @@ import HorizontalScroller from './HorizontalScroller';
 import type { Anime, ListKey } from '@/lib/types';
 import { updateAnimeStatus, deleteAnimeFromList } from '@/app/actions';
 import { unmapListStatus } from '@/lib/mapper';
+import { EpisodeGrid } from './EpisodeTracker';
 
 function DetailAttr({ label, value }: { label: string; value: string }) {
   return (
@@ -169,10 +170,10 @@ function DetailHero({
             </span>
             <span className="dt-meta-pill dt-meta-pill--hd">HD</span>
             <span className="dt-meta-pill dt-meta-pill--cc">
-              CC <b>{anime.episodes}</b>
+              CC <b>{anime.episodes || '?'}</b>
             </span>
             <span className="dt-meta-pill dt-meta-pill--mic">
-              🎙 <b>{Math.max(2, anime.episodes - 4)}</b>
+              🎙 <b>{anime.episodes > 0 ? Math.max(2, anime.episodes - 4) : '?'}</b>
             </span>
           </div>
           <p className="dt-synopsis">{anime.synopsis}</p>
@@ -198,8 +199,35 @@ function DetailHero({
   );
 }
 
-function SeasonsList({ anime }: { anime: Anime }) {
+function SeasonsList({
+  anime,
+  currentWatchedEps,
+  onEpisodeChange
+}: {
+  anime: Anime;
+  currentWatchedEps: number;
+  onEpisodeChange: (ep: number) => void;
+}) {
+  const [expandedSeason, setExpandedSeason] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!anime.seasons?.length) return;
+
+    // Determine which season to expand by default
+    let accumulated = 0;
+    let found = anime.seasons[0].n;
+    for (const s of anime.seasons) {
+      if (s.episodes === 0 || (currentWatchedEps >= accumulated && currentWatchedEps < accumulated + s.episodes)) {
+        found = s.n;
+        break;
+      }
+      accumulated += s.episodes;
+    }
+    setExpandedSeason(found);
+  }, [anime.seasons, currentWatchedEps]);
+
   if (!anime.seasons?.length) return null;
+
   return (
     <section className="dt-seasons-section section">
       <header className="section-head">
@@ -208,19 +236,47 @@ function SeasonsList({ anime }: { anime: Anime }) {
         </div>
       </header>
       <div className="dt-seasons">
-        {anime.seasons.map((s) => (
-          <div key={s.n} className={'dt-season' + (s.isCurrent ? ' is-current' : '')}>
-            <div className="dt-season-n">{String(s.n).padStart(2, '0')}</div>
-            <div>
-              <div className="dt-season-title">Season {s.n}</div>
-              <div className="dt-season-meta">
-                {s.year} · {s.episodes} episodes
+        {anime.seasons.map((s, idx) => {
+          const isExpanded = expandedSeason === s.n;
+
+          // Calculate the global episode offset for this season
+          let startEp = 1;
+          for (let i = 0; i < idx; i++) {
+            startEp += anime.seasons[i].episodes;
+          }
+
+          return (
+            <div key={s.n} className="dt-season-container">
+              <div
+                className={'dt-season' + (s.isCurrent ? ' is-current' : '') + (isExpanded ? ' is-expanded' : '')}
+                onClick={() => setExpandedSeason(isExpanded ? null : s.n)}
+              >
+                <div className="dt-season-n">{String(s.n).padStart(2, '0')}</div>
+                <div style={{ flex: 1 }}>
+                  <div className="dt-season-title">Season {s.n}</div>
+                  <div className="dt-season-meta">
+                    {s.year} · {s.episodes || '?'} episodes
+                  </div>
+                </div>
+                {s.isCurrent && <div className="dt-season-badge">Airing</div>}
+                <button className="dt-season-go" aria-label="Toggle season">
+                  {isExpanded ? '▾' : '›'}
+                </button>
               </div>
+
+              {isExpanded && (
+                <div className="dt-season-tracker">
+                  <EpisodeGrid
+                    totalEpisodes={s.episodes}
+                    watchedCount={currentWatchedEps}
+                    startEpisode={startEp}
+                    onEpisodeChange={onEpisodeChange}
+                  />
+                </div>
+              )}
             </div>
-            {s.isCurrent && <div className="dt-season-badge">Airing</div>}
-            <button className="dt-season-go" aria-label="View season">›</button>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
@@ -228,14 +284,29 @@ function SeasonsList({ anime }: { anime: Anime }) {
 
 export default function DetailView({ initialAnime }: { initialAnime: Anime | null }) {
   const router = useRouter();
-  const { lists, watchedEps, setListFor, removeFrom } = useStore();
+  const { lists, watchedEps, setListFor, removeFrom, updateWatchedEps } = useStore();
   const anime = initialAnime;
 
+  const [isSynced, setIsSynced] = useState(false);
+  const syncAttemptedRef = useRef(false);
+
   useEffect(() => {
-    if (anime && anime.listKey && !lists[anime.id]) {
-      setListFor(anime.id, anime.listKey);
+    if (anime && !syncAttemptedRef.current) {
+      // We wait a tiny bit to ensure StoreProvider's localStorage hydration 
+      // (which uses setTimeout 0) has completed before we overwrite it with fresh MAL data.
+      const timer = setTimeout(() => {
+        if (anime.listKey) {
+          setListFor(anime.id, anime.listKey, anime.title);
+        }
+        if (anime.watchedEps !== undefined) {
+          updateWatchedEps(anime.id, anime.watchedEps);
+        }
+        syncAttemptedRef.current = true;
+        setIsSynced(true);
+      }, 50);
+      return () => clearTimeout(timer);
     }
-  }, [anime, lists, setListFor]);
+  }, [anime, setListFor, updateWatchedEps]);
 
   if (!anime) {
     return (
@@ -269,8 +340,8 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
     }
   };
 
-  const currentList = lists[anime.id] ?? anime.listKey ?? null;
-  const currentWatchedEps = watchedEps[anime.id] ?? anime.watchedEps ?? 0;
+  const currentList = !isSynced ? (anime.listKey ?? null) : (lists[anime.id] ?? anime.listKey ?? null);
+  const currentWatchedEps = !isSynced ? (anime.watchedEps ?? 0) : ((watchedEps[anime.id] !== undefined) ? watchedEps[anime.id] : (anime.watchedEps ?? 0));
   const related = anime.relatedIds
     .map((id) => ANIME_BY_ID[id])
     .filter((a): a is Anime => !!a);
@@ -287,7 +358,12 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
         onSetList={handleSetList}
         onRemove={handleRemove}
       />
-      <SeasonsList anime={anime} />
+
+      <SeasonsList
+        anime={anime}
+        currentWatchedEps={currentWatchedEps || 0}
+        onEpisodeChange={(ep) => updateWatchedEps(anime.id, ep)}
+      />
       {related.length > 0 && (
         <section className="section">
           <header className="section-head">
@@ -302,7 +378,7 @@ export default function DetailView({ initialAnime }: { initialAnime: Anime | nul
                 <AnimeCard
                   anime={a}
                   currentList={lists[a.id] ?? null}
-                  watchedEps={watchedEps[a.id] ?? 0}
+                  watchedEps={watchedEps[a.id] ?? a.watchedEps ?? 0}
                   onSetList={async (k) => {
                     setListFor(a.id, k, a.title);
                     try {

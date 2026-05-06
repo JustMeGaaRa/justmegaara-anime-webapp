@@ -10,6 +10,7 @@ interface StoreContextValue {
   toast: string | null;
   setListFor: (id: string, key: string, title?: string) => void;
   removeFrom: (id: string, title?: string) => void;
+  updateWatchedEps: (id: string, eps: number) => void;
 }
 
 const StoreContext = createContext<StoreContextValue | null>(null);
@@ -84,9 +85,16 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     [showToast],
   );
 
+  const updateWatchedEps = useCallback(
+    (id: string, eps: number) => {
+      setWatchedEps((prev) => ({ ...prev, [id]: eps }));
+    },
+    [],
+  );
+
   const value = useMemo(
-    () => ({ lists, watchedEps, toast, setListFor, removeFrom }),
-    [lists, watchedEps, toast, setListFor, removeFrom],
+    () => ({ lists, watchedEps, toast, setListFor, removeFrom, updateWatchedEps }),
+    [lists, watchedEps, toast, setListFor, removeFrom, updateWatchedEps],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

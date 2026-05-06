@@ -24,7 +24,7 @@ const ANIME_FIELDS = [
   'rating',
   'num_episodes',
   'source',
-  'list_status',
+  'my_list_status',
   'related_anime',
   'recommendations',
 ].join(',');

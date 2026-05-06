@@ -1,0 +1,235 @@
+.et-card,
+.et-grid-wrapper {
+  --blue-primary: #378ADD;
+  --blue-light: #B5D4F4;
+  --blue-dark-text: #0C447C;
+  --blue-dark-border: #185FA5;
+  
+  /* Theming variables */
+  --et-card-bg: var(--bg-card, #ffffff);
+  --et-card-border: var(--line-soft, rgba(0, 0, 0, 0.1));
+  --et-text-main: var(--fg, #1a1a1a);
+  --et-text-muted: var(--fg-3, #666666);
+  --et-secondary-bg: var(--bg-elev, #f5f5f5);
+  --et-secondary-border: var(--line-soft, #e0e0e0);
+}
+
+.et-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.et-card--full {
+  max-width: none !important;
+  width: 100%;
+}
+
+.et-grid-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 12px;
+}
+
+.dt-season-tracker {
+  background: var(--bg-card);
+  border: 1px solid var(--line-soft);
+  border-top: none;
+  border-bottom-left-radius: var(--radius);
+  border-bottom-right-radius: var(--radius);
+  padding: 0 20px 20px;
+  margin-top: -8px;
+  margin-bottom: 8px;
+}
+
+.dt-season.is-expanded {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: transparent;
+  background: var(--bg-card-hover);
+}
+
+/* Legend */
+.et-legend {
+  display: flex;
+  gap: 12px;
+}
+
+.et-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--et-text-muted);
+}
+
+.et-box {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+
+.et-box--current {
+  background: var(--blue-primary);
+}
+
+.et-box--watched {
+  background: var(--blue-light);
+  border: 1px solid var(--blue-primary);
+}
+
+.et-box--unwatched {
+  background: var(--et-secondary-bg);
+  border: 1px solid var(--et-secondary-border);
+}
+
+/* Card */
+.et-card {
+  background: var(--et-card-bg);
+  border: 0.5px solid var(--et-card-border);
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Header */
+.et-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.et-show-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--et-text-main);
+  margin: 0;
+}
+
+.et-season-badge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--et-secondary-bg);
+  color: var(--et-text-muted);
+  font-weight: 500;
+}
+
+/* Progress Bar */
+.et-progress-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.et-progress-track {
+  flex: 1;
+  height: 5px;
+  background: var(--et-secondary-bg);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.et-progress-fill {
+  height: 100%;
+  background: var(--blue-primary);
+  transition: width 0.3s ease;
+}
+
+.et-progress-text {
+  font-size: 11px;
+  color: var(--et-text-muted);
+  white-space: nowrap;
+}
+
+/* Grid */
+.et-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.et-ep-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 400;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.et-ep--watched {
+  background: var(--blue-light);
+  border-color: var(--blue-primary);
+  color: var(--blue-dark-text);
+}
+
+.et-ep--current {
+  background: var(--blue-primary);
+  border-color: var(--blue-dark-border);
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.et-ep--unwatched {
+  background: var(--et-secondary-bg);
+  border-color: var(--et-secondary-border);
+  color: var(--et-text-muted);
+}
+
+.et-ep-btn:hover {
+  filter: brightness(0.95);
+  transform: translateY(-1px);
+}
+
+.et-ep-btn:active {
+  transform: translateY(0);
+}
+
+/* Stats */
+.et-stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--et-secondary-border);
+}
+
+.et-stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.et-stat-value {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--et-text-main);
+}
+
+.et-stat-label {
+  font-size: 10px;
+  color: var(--et-text-muted);
+  text-transform: lowercase;
+}
+
+/* Hint */
+.et-hint {
+  font-size: 11px;
+  color: var(--et-text-muted);
+  margin: 0;
+  text-align: center;
+  line-height: 1.4;
+}
